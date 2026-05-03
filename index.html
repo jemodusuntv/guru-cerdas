@@ -188,31 +188,8 @@ tr:hover td{background:#f8fafc}
 </head>
 <body>
 
-<!-- CONFIG SCREEN (isi sekali) -->
-<div id="config-screen" style="display:flex">
-  <div class="config-box">
-    <div style="text-align:center;margin-bottom:20px">
-      <i class="fas fa-chalkboard-teacher" style="font-size:36px;color:var(--primary)"></i>
-      <h2 style="margin-top:8px">Setup My AdTeach</h2>
-      <p>Masukkan kredensial Supabase Anda (hanya sekali)</p>
-    </div>
-    <div class="form-group">
-      <label>Supabase URL</label>
-      <input type="text" id="cfg-url" class="form-control" placeholder="https://xxxx.supabase.co">
-    </div>
-    <div class="form-group">
-      <label>Supabase Anon Key</label>
-      <textarea id="cfg-key" class="form-control" rows="3" placeholder="eyJhbGci..."></textarea>
-    </div>
-    <div class="form-group">
-      <label>PIN Login <small style="color:var(--muted)">(4-6 digit, untuk masuk app)</small></label>
-      <input type="password" id="cfg-pin" class="form-control" placeholder="Contoh: 1234" maxlength="6">
-    </div>
-    <button class="btn btn-primary btn-block" onclick="saveConfig()">
-      <i class="fas fa-save"></i> Simpan & Mulai
-    </button>
-  </div>
-</div>
+<!-- CONFIG SCREEN: isi SUPABASE_URL dan SUPABASE_KEY di bawah -->
+<div id="config-screen" style="display:none"></div>
 
 <!-- LOGIN -->
 <div id="login-screen" style="display:none">
@@ -230,9 +207,7 @@ tr:hover td{background:#f8fafc}
     <button class="btn btn-primary btn-block" onclick="doLogin()" id="login-btn">
       <i class="fas fa-sign-in-alt"></i> Masuk
     </button>
-    <div style="text-align:center;margin-top:16px">
-      <button class="btn-ghost" onclick="resetConfig()" style="font-size:12px">⚙️ Ubah konfigurasi</button>
-    </div>
+
   </div>
 </div>
 
@@ -571,45 +546,48 @@ tr:hover td{background:#f8fafc}
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  CONFIG & AUTH
+//  CONFIG — EDIT 2 BARIS INI SAJA, SISANYA OTOMATIS
 // ══════════════════════════════════════════════════════════════
-let SB_URL = '', SB_KEY = '', PIN = '';
+const SB_URL = 'https://qtbejsnjvgxefkvizrrp.supabase.co';   // contoh: https://abcxyz.supabase.co
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0YmVqc25qdmd4ZWZrdml6cnJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3OTkyNDYsImV4cCI6MjA5MzM3NTI0Nn0.dqWsUR7WqL77Bt2fi_GxoZLHlIja3HUswQOghKntt_k';        // dari Supabase → Settings → API
+
+let PIN = '';
 let allKelas = [], allSiswa = [], settings = {};
 
-function saveConfig() {
-  const url = document.getElementById('cfg-url').value.trim();
-  const key = document.getElementById('cfg-key').value.trim();
-  const pin = document.getElementById('cfg-pin').value.trim();
-  if (!url || !key || !pin) return alert('Semua field wajib diisi!');
-  localStorage.setItem('sb_url', url);
-  localStorage.setItem('sb_key', key);
-  localStorage.setItem('app_pin', pin);
-  SB_URL = url; SB_KEY = key; PIN = pin;
-  document.getElementById('config-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-}
+// ── AUTH ────────────────────────────────────────────────────
+async function loadConfig() {
+  // Ambil PIN dari Supabase
+  try {
+    const data = await sb('config', 'GET', null, '?key=eq.pin&limit=1');
+    PIN = data?.[0]?.value || '1234';
+  } catch(e) {
+    // Kalau gagal ambil dari Supabase, pakai PIN default
+    PIN = localStorage.getItem('fallback_pin') || '1234';
+    showErrorBanner('Gagal koneksi Supabase: ' + e.message);
+    return;
+  }
 
-function loadConfig() {
-  SB_URL = localStorage.getItem('sb_url') || '';
-  SB_KEY = localStorage.getItem('sb_key') || '';
-  PIN    = localStorage.getItem('app_pin') || '';
-  if (!SB_URL || !SB_KEY || !PIN) {
-    document.getElementById('config-screen').style.display = 'flex';
+  const loggedIn = sessionStorage.getItem('logged_in') === '1';
+  if (loggedIn) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    initApp();
   } else {
-    document.getElementById('config-screen').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
   }
 }
 
-function resetConfig() {
-  if (!confirm('Reset konfigurasi? Anda perlu isi ulang Supabase URL dan Key.')) return;
-  localStorage.clear();
-  location.reload();
+function showErrorBanner(msg) {
+  document.getElementById('login-screen').style.display = 'flex';
+  const al = document.getElementById('login-alert');
+  al.textContent = msg + ' — cek SB_URL dan SB_KEY di file HTML.';
+  al.style.display = 'block';
 }
 
 function doLogin() {
   const pin = document.getElementById('inp-pin').value;
   if (pin === PIN) {
+    sessionStorage.setItem('logged_in', '1');
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     initApp();
@@ -623,6 +601,7 @@ function doLogin() {
 }
 
 function doLogout() {
+  sessionStorage.removeItem('logged_in');
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('inp-pin').value = '';
@@ -643,15 +622,31 @@ async function sb(table, method='GET', body=null, query='') {
     'apikey': SB_KEY,
     'Authorization': `Bearer ${SB_KEY}`,
     'Content-Type': 'application/json',
-    'Prefer': method === 'POST' ? 'return=representation' : 'return=representation',
   };
-  if (method === 'GET') headers['Prefer'] = '';
-  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || 'Supabase error');
+  if (method === 'POST' || method === 'PATCH') headers['Prefer'] = 'return=representation';
+
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), 12000);
+  try {
+    const res = await fetch(url, {
+      method, headers,
+      body: body ? JSON.stringify(body) : null,
+      signal: ctrl.signal
+    });
+    clearTimeout(tid);
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try { const j = await res.json(); msg = j.message || j.hint || msg; } catch(e){}
+      throw new Error(msg);
+    }
+    if (method === 'DELETE') return true;
+    const txt = await res.text();
+    return txt ? JSON.parse(txt) : [];
+  } catch(e) {
+    clearTimeout(tid);
+    if (e.name === 'AbortError') throw new Error('Timeout — cek koneksi atau Supabase URL');
+    throw e;
   }
-  return method === 'DELETE' ? true : res.json();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1270,11 +1265,26 @@ async function gantiPIN() {
   const baru  = document.getElementById('pin-baru').value;
   if (lama !== PIN) return showToast('PIN lama salah!','error');
   if (!baru || baru.length < 4) return showToast('PIN baru minimal 4 digit!','error');
-  localStorage.setItem('app_pin', baru);
-  PIN = baru;
-  document.getElementById('pin-lama').value = '';
-  document.getElementById('pin-baru').value = '';
-  showToast('PIN berhasil diubah!','success');
+  setLoading(true);
+  try {
+    // Simpan PIN baru ke Supabase
+    await fetch(`${SB_URL}/rest/v1/config?key=eq.pin`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ value: baru })
+    });
+    PIN = baru;
+    localStorage.setItem('fallback_pin', baru); // backup lokal
+    document.getElementById('pin-lama').value = '';
+    document.getElementById('pin-baru').value = '';
+    showToast('PIN berhasil diubah!','success');
+  } catch(e) {
+    showToast('Gagal simpan PIN: ' + e.message, 'error');
+  }
+  setLoading(false);
 }
 
 // ══════════════════════════════════════════════════════════════

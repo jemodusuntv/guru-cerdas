@@ -19,11 +19,11 @@
   --shadow:0 1px 8px rgba(0,0,0,.07);--radius:12px;
   --sw:248px;--hh:58px;
 }
-html,body{height:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-tap-highlight-color:transparent}
+html,body{height:100%;width:100%;margin:0;padding:0;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-tap-highlight-color:transparent;overflow-x:hidden}
 a{text-decoration:none}
 
 /* ── LOGIN ── */
-#login-screen{display:none;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(160deg,#14532d 0%,#16a34a 100%)}
+#login-screen{display:none;min-height:100vh;width:100%;align-items:center;justify-content:center;background:linear-gradient(160deg,#14532d 0%,#16a34a 100%)}
 .login-card{background:#fff;border-radius:24px;padding:44px 36px;width:100%;max-width:360px;box-shadow:0 24px 64px rgba(0,0,0,.25);text-align:center}
 .login-logo{margin-bottom:28px}
 .login-logo .logo-icon{width:72px;height:72px;background:var(--green-light);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px}
@@ -41,7 +41,7 @@ a{text-decoration:none}
 .login-error{color:var(--danger);font-size:13px;margin-top:8px;min-height:20px}
 
 /* ── APP ── */
-#app{display:none;height:100vh;overflow:hidden}
+#app{display:none;height:100vh;width:100%;overflow:hidden}
 .sidebar{position:fixed;top:0;left:0;width:var(--sw);height:100vh;background:var(--sidebar);display:flex;flex-direction:column;z-index:100;transition:.28s cubic-bezier(.4,0,.2,1)}
 .sb-brand{height:var(--hh);display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.08)}
 .sb-brand .brand-icon{width:36px;height:36px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -65,7 +65,7 @@ a{text-decoration:none}
 .sb-version span{color:rgba(255,255,255,.45);font-weight:600}
 
 /* ── MAIN ── */
-.main{margin-left:var(--sw);height:100vh;display:flex;flex-direction:column;transition:.28s}
+.main{margin-left:var(--sw);height:100vh;width:calc(100% - var(--sw));display:flex;flex-direction:column;transition:.28s}
 .topbar{height:var(--hh);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:12px;flex-shrink:0}
 .menu-toggle{display:none;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text);padding:4px}
 .topbar-title{font-size:16px;font-weight:700;flex:1;color:var(--text)}
@@ -219,7 +219,7 @@ textarea.form-control{resize:vertical;min-height:75px}
   :root{--hh:54px}
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0)}
-  .main{margin-left:0}
+  .main{margin-left:0;width:100%}
   .menu-toggle{display:block}
 
   /* Stats - 2 kolom di HP */
@@ -290,7 +290,7 @@ textarea.form-control{resize:vertical;min-height:75px}
   .sb-version{font-size:9px;margin-top:8px}
 
   /* Pin pad login lebih besar di mobile */
-  .login-card{padding:32px 24px;border-radius:0;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+  .login-card{padding:32px 24px;border-radius:0;min-height:100vh;width:100%;max-width:100%;display:flex;flex-direction:column;justify-content:center}
   .pin-btn{padding:18px;font-size:20px}
 }
 
@@ -371,7 +371,7 @@ textarea.form-control{resize:vertical;min-height:75px}
         </div>
         <button class="sb-logout" onclick="doLogout()" title="Keluar"><i class="fas fa-sign-out-alt"></i></button>
       </div>
-      <div class="sb-version">JDTeacher <span>v1.0.2</span> · 2025-05-03</div>
+      <div class="sb-version">JDTeacher <span>v1.0.2</span> · 2026-05-03</div>
     </div>
   </aside>
 

@@ -190,25 +190,117 @@ textarea.form-control{resize:vertical;min-height:75px}
 .sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:99;display:none}
 .sb-overlay.show{display:block}
 
-/* ── DESKTOP WIDE ── */
+/* ── DESKTOP WIDE (1200px+) ── */
 @media(min-width:1200px){
   .stats-grid{grid-template-columns:repeat(5,1fr)}
   .content{padding:28px 40px}
   .welcome{padding:32px 40px}
   .welcome h2{font-size:22px}
+  .card-hdr{padding:16px 22px}
+  .card-body{padding:22px}
+  .filter-bar{gap:12px}
 }
 @media(min-width:1600px){
-  .content{padding:28px 48px}
+  .content{padding:28px 52px}
+  .modal{max-width:600px}
 }
-/* ── RESPONSIVE ── */
+
+/* ── TABLET (768px - 1024px) ── */
+@media(min-width:769px) and (max-width:1024px){
+  :root{--sw:210px}
+  .stats-grid{grid-template-columns:repeat(3,1fr)}
+  .content{padding:16px 20px}
+  .form-row{grid-template-columns:1fr 1fr}
+  .filter-bar{flex-wrap:wrap}
+}
+
+/* ── MOBILE (max 768px) ── */
 @media(max-width:768px){
+  :root{--hh:54px}
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0)}
   .main{margin-left:0}
   .menu-toggle{display:block}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .content{padding:14px}
-  .topbar{padding:0 14px}
+
+  /* Stats - 2 kolom di HP */
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+  .stat-card{padding:14px 12px}
+  .stat-card .ic{width:34px;height:34px;font-size:15px;margin-bottom:8px}
+  .stat-num{font-size:22px}
+  .stat-lbl{font-size:11px}
+
+  /* Content */
+  .content{padding:12px}
+  .topbar{padding:0 12px}
+  .topbar-title{font-size:14px}
+
+  /* Welcome card */
+  .welcome{padding:18px 20px;margin-bottom:14px}
+  .welcome h2{font-size:16px}
+  .welcome p{font-size:12px}
+
+  /* Card */
+  .card-hdr{padding:12px 14px;flex-direction:column;align-items:flex-start}
+  .card-body{padding:12px 14px}
+  .card-title{font-size:13px}
+
+  /* Page header */
+  .page-hdr{margin-bottom:14px}
+  .page-hdr-left h2{font-size:16px}
+  .page-hdr-left p{font-size:12px}
+
+  /* Table - scroll horizontal */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -14px;padding:0 14px}
+  table{min-width:520px}
+  th{font-size:10.5px;padding:8px 10px}
+  td{font-size:12.5px;padding:9px 10px}
+
+  /* Filter bar */
+  .filter-bar{flex-direction:column;align-items:stretch;gap:8px}
+  .filter-bar .form-group{width:100%!important}
+  .filter-bar .form-control{width:100%!important}
+
+  /* Forms */
+  .form-row{grid-template-columns:1fr}
+  .form-group{margin-bottom:12px}
+  .form-control{font-size:16px} /* cegah zoom di iOS */
+
+  /* Buttons */
+  .btn{font-size:13px;padding:9px 14px}
+  .btn-sm{font-size:12px;padding:7px 12px}
+  .btn-icon{width:30px;height:30px}
+
+  /* Modal - full bottom sheet di mobile */
+  .overlay{align-items:flex-end;padding:0}
+  .modal{max-width:100%;border-radius:20px 20px 0 0;max-height:95vh}
+  .modal-hdr{padding:14px 18px}
+  .modal-body{padding:16px 18px}
+  .modal-ftr{padding:12px 18px}
+
+  /* Absensi grid - 1 kolom di HP */
+  .absen-grid{grid-template-columns:1fr}
+
+  /* Sidebar brand lebih compact */
+  .sb-brand{height:54px;padding:0 16px}
+  .sb-nav{padding:8px 8px}
+  .nav-item{padding:9px 12px;font-size:13px}
+  .nav-section{padding:12px 12px 4px;font-size:9px}
+
+  /* Version text */
+  .sb-version{font-size:9px;margin-top:8px}
+
+  /* Pin pad login lebih besar di mobile */
+  .login-card{padding:32px 24px;border-radius:0;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+  .pin-btn{padding:18px;font-size:20px}
+}
+
+/* ── SMALL MOBILE (max 380px) ── */
+@media(max-width:380px){
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-num{font-size:20px}
+  .content{padding:10px}
+  .pin-pad{gap:8px}
+  .pin-btn{padding:14px;font-size:18px}
 }
 </style>
 </head>
@@ -279,7 +371,7 @@ textarea.form-control{resize:vertical;min-height:75px}
         </div>
         <button class="sb-logout" onclick="doLogout()" title="Keluar"><i class="fas fa-sign-out-alt"></i></button>
       </div>
-      <div class="sb-version">JDTeacher <span>v1.0.0</span> · 2025-05-03</div>
+      <div class="sb-version">JDTeacher <span>v1.0.2</span> · 2025-05-03</div>
     </div>
   </aside>
 

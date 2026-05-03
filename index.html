@@ -660,14 +660,37 @@ async function sb(table, method='GET', body=null, query='') {
 async function initApp() {
   setLoading(true);
   try {
+    // Test koneksi dulu
+    const test = await fetch(`${SB_URL}/rest/v1/kelas?limit=1`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    if (!test.ok) throw new Error('Koneksi Supabase gagal. Cek URL dan Key.');
+
     await loadAllKelas();
     await loadSettings();
     await loadDashboard();
     document.getElementById('absensi-tanggal').value = today();
   } catch(e) {
-    showToast('Gagal koneksi ke Supabase: ' + e.message, 'error');
+    showToast('Error: ' + e.message, 'error');
+    // Tampilkan error detail di dashboard
+    document.getElementById('page-dashboard').innerHTML = `
+      <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:24px;color:#991b1b">
+        <h3 style="margin-bottom:8px">⚠️ Gagal Koneksi ke Supabase</h3>
+        <p style="font-size:13px;margin-bottom:16px">${e.message}</p>
+        <p style="font-size:13px"><strong>Kemungkinan penyebab:</strong></p>
+        <ul style="font-size:13px;margin-left:20px;margin-top:8px;line-height:2">
+          <li>Supabase URL salah (harus: https://xxxx.supabase.co)</li>
+          <li>Anon Key salah atau expired</li>
+          <li>SQL setup belum dijalankan di Supabase</li>
+          <li>RLS masih aktif di tabel</li>
+        </ul>
+        <button class="btn btn-danger" style="margin-top:16px" onclick="resetConfig()">
+          <i class="fas fa-cog"></i> Reset Konfigurasi
+        </button>
+      </div>`;
+  } finally {
+    setLoading(false);
   }
-  setLoading(false);
 }
 
 function today() { return new Date().toISOString().split('T')[0]; }
@@ -1202,10 +1225,13 @@ async function cetakPDF() {
 // ══════════════════════════════════════════════════════════════
 async function loadSettings() {
   try {
-    const data = await sb('pengaturan','GET',null,'');
+    const data = await sb('pengaturan','GET',null,'?limit=50');
     settings = {};
-    data.forEach(r => { settings[r.key] = r.value; });
-  } catch(e) {}
+    if (Array.isArray(data)) data.forEach(r => { settings[r.key] = r.value; });
+  } catch(e) {
+    console.warn('loadSettings error:', e.message);
+    settings = {};
+  }
 }
 
 function renderSettings() {
@@ -1221,12 +1247,14 @@ async function savePengaturan() {
   try {
     for (const k of keys) {
       const val = document.getElementById('set-'+k)?.value || '';
-      await sb('pengaturan','POST',{key:k, value:val},'');
-      // upsert manual
+      // Upsert: update jika ada, insert jika belum ada
       await fetch(`${SB_URL}/rest/v1/pengaturan?key=eq.${k}`, {
-        method:'PATCH',
-        headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'},
-        body: JSON.stringify({value:val})
+        method: 'PATCH',
+        headers: {
+          'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ value: val })
       });
       settings[k] = val;
     }

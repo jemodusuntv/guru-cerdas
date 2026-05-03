@@ -144,9 +144,9 @@ textarea.form-control{resize:vertical;min-height:75px}
 .filter-bar .form-control{padding:8px 12px;font-size:13px}
 
 /* ── MODAL ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;visibility:hidden;transition:.2s}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0;opacity:0;visibility:hidden;transition:.2s}
 .overlay.open{opacity:1;visibility:visible}
-.modal{background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;transform:translateY(18px);transition:.2s;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:100%;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:.3s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 30px rgba(0,0,0,.15)}
 .overlay.open .modal{transform:translateY(0)}
 .modal-hdr{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
 .modal-hdr h3{font-size:15px;font-weight:700}
@@ -202,7 +202,11 @@ textarea.form-control{resize:vertical;min-height:75px}
 }
 @media(min-width:1600px){
   .content{padding:28px 52px}
-  .modal{max-width:600px}
+}
+@media(min-width:769px){
+  .overlay{align-items:center;padding:16px}
+  .modal{border-radius:16px;max-width:540px;transform:translateY(20px)}
+  .overlay.open .modal{transform:translateY(0)}
 }
 
 /* ── TABLET (768px - 1024px) ── */
@@ -240,7 +244,7 @@ textarea.form-control{resize:vertical;min-height:75px}
   .welcome p{font-size:12px}
 
   /* Card */
-  .card-hdr{padding:12px 14px;flex-direction:column;align-items:flex-start}
+  .card-hdr{padding:12px 14px}
   .card-body{padding:12px 14px}
   .card-title{font-size:13px}
 
@@ -255,10 +259,13 @@ textarea.form-control{resize:vertical;min-height:75px}
   th{font-size:10.5px;padding:8px 10px}
   td{font-size:12.5px;padding:9px 10px}
 
-  /* Filter bar */
-  .filter-bar{flex-direction:column;align-items:stretch;gap:8px}
-  .filter-bar .form-group{width:100%!important}
+  /* Filter bar mobile - grid 2 kolom */
+  .filter-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+  .filter-bar .form-group{width:100%!important;margin-bottom:0}
   .filter-bar .form-control{width:100%!important}
+  .filter-bar .form-group:only-child{grid-column:span 2}
+  /* Kalau 3 item, yg terakhir full width */
+  .filter-bar .form-group:last-child:nth-child(3){grid-column:span 2}
 
   /* Forms */
   .form-row{grid-template-columns:1fr}
@@ -270,9 +277,7 @@ textarea.form-control{resize:vertical;min-height:75px}
   .btn-sm{font-size:12px;padding:7px 12px}
   .btn-icon{width:30px;height:30px}
 
-  /* Modal - full bottom sheet di mobile */
-  .overlay{align-items:flex-end;padding:0}
-  .modal{max-width:100%;border-radius:20px 20px 0 0;max-height:95vh}
+  /* Modal - bottom sheet di mobile */
   .modal-hdr{padding:14px 18px}
   .modal-body{padding:16px 18px}
   .modal-ftr{padding:12px 18px}
@@ -371,7 +376,7 @@ textarea.form-control{resize:vertical;min-height:75px}
         </div>
         <button class="sb-logout" onclick="doLogout()" title="Keluar"><i class="fas fa-sign-out-alt"></i></button>
       </div>
-      <div class="sb-version">JDTeacher <span>v1.0.2</span> · 2026-05-03</div>
+      <div class="sb-version">JDTeacher <span>v1.0.4</span> · 2026-05-03</div>
     </div>
   </aside>
 
@@ -902,7 +907,20 @@ function goPage(name) {
   if (name === 'dashboard') loadDashboard();
   else if (name === 'kelas') loadKelas();
   else if (name === 'siswa') { fillKelasSelect('f-siswa-kelas', true); loadSiswa(); }
-  else if (name === 'absensi') { fillKelasSelect('ab-kelas'); fillKelasSelect('f-ab-kelas', true); loadRiwayatAbsensi(); }
+  else if (name === 'absensi') {
+    fillKelasSelect('ab-kelas');
+    fillKelasSelect('f-ab-kelas', true);
+    // Set tanggal hari ini otomatis
+    const tglEl = document.getElementById('ab-tgl');
+    if (!tglEl.value) tglEl.value = today();
+    // Set mata pelajaran dari config
+    const mapelEl = document.getElementById('ab-mapel');
+    if (!mapelEl.value) mapelEl.value = CFG.mataPelajaran || '';
+    // Set bulan ini di filter riwayat
+    const bulanEl = document.getElementById('f-ab-bulan');
+    if (!bulanEl.value) bulanEl.value = today().substring(0,7);
+    loadRiwayatAbsensi();
+  }
   else if (name === 'nilai') { fillKelasSelect('f-nilai-kelas', true); loadNilai(); }
   else if (name === 'jurnal') { fillKelasSelect('f-jurnal-kelas', true); loadJurnal(); }
   else if (name === 'rekap') { fillKelasSelect('f-rekap-kelas'); }
